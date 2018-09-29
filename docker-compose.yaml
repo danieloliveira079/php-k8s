@@ -74,7 +74,7 @@ services:
       #Exposes 3307 to be acessed by external DB client tools like Sequel using 127.0.0.1:3307
       - "3307:3306"
     environment:
-      MYSQL_DATABASE: php-k8s-db
+      MYSQL_DATABASE: php_k8s_db
       MYSQL_USER: developer
       MYSQL_PASSWORD: supersecret
       MYSQL_ROOT_PASSWORD: root
