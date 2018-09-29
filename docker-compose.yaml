@@ -1,0 +1,82 @@
+version: "3"
+
+services:
+  nginx:
+    container_name: nginx
+    image: nginx
+    ports:
+      - "9001:80"
+    depends_on:
+      - web
+    volumes:
+      - $PWD/public:/usr/share/nginx/html
+      - $PWD/dev/nginx.conf:/etc/nginx/nginx.conf:ro
+
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: [ "web" ]
+    working_dir: /app
+    ports:
+      - "9000:9000"
+    environment:
+      ENVIRONMENT: development
+    volumes:
+      - $PWD:/app
+      - $PWD/dev/php-fpm.conf:/usr/local/etc/php-fpm.d/zz-docker.conf:ro
+
+  worker:
+    container_name: worker
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: [ "worker", "redis", "default", "10", "120", "10" ]
+    working_dir: /app
+    environment:
+      ENVIRONMENT: development
+    volumes:
+      - $PWD:/app
+      - $PWD/dev/php-fpm.conf:/usr/local/etc/php-fpm.d/zz-docker.conf:ro
+
+  #scheduler:
+  #  container_name: scheduler
+  #  build:
+  #    context: .
+  #    dockerfile: Dockerfile
+  #  command: [ "scheduler"]
+  #  working_dir: /app
+  #  environment:
+  #    ENVIRONMENT: development
+  #  volumes:
+  #    - $PWD:/app
+  #    - $PWD/dev/php-fpm.conf:/usr/local/etc/php-fpm.d/zz-docker.conf:ro
+
+  redis:
+    container_name: redis
+    image: redis:3.2
+    ports:
+      - "6378:6379"
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: elasticsearch:5.5
+    ports:
+      - "9201:9200"
+    volumes:
+      - $PWD/.datastore/php-k8s/data/elasticsearch:/usr/share/elasticsearch/data
+
+  mysql:
+    container_name: mysql
+    image: mysql:5.7
+    ports:
+      #Exposes 3307 to be acessed by external DB client tools like Sequel using 127.0.0.1:3307
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: php-k8s-db
+      MYSQL_USER: developer
+      MYSQL_PASSWORD: supersecret
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - $PWD/.datastore/php-k8s/data/mysql:/var/lib/mysql
