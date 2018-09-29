@@ -24,11 +24,11 @@ RUN pecl install apcu && \
 ADD ./composer.json ./composer.lock /app/
 
 RUN composer global require hirak/prestissimo && \
-		/usr/local/bin/composer install --no-dev --no-autoloader --no-scripts
+		/usr/local/bin/composer install --no-autoloader --no-scripts
 
 COPY . /app
 
-RUN /usr/local/bin/composer install --no-dev
+RUN /usr/local/bin/composer install
 
 RUN mkdir -p \
         bootstrap/cache \
