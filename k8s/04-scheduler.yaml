@@ -1,0 +1,32 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: scheduler
+  namespace: php-k8s
+  labels:
+    app: scheduler
+spec:
+  schedule: "*/1 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          #imagePullSecrets:
+          #  - name: imagepullsecret
+          containers:
+            - name: scheduler
+              image: danieloliv/php-k8s:latest
+              imagePullPolicy: IfNotPresent
+              securityContext:
+                runAsUser: 33
+                allowPrivilegeEscalation: false
+                privileged: false
+              args: ["scheduler"]
+              envFrom:
+                - configMapRef:
+                    name: environment-config
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 10
+          automountServiceAccountToken: false

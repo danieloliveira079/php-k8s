@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: php-k8s
+  labels:
+    role: worker
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      role: worker
+  template:
+    metadata:
+      labels:
+        role: worker
+    spec:
+      #imagePullSecrets:
+      #  - name: imagepullsecret
+      containers:
+      - name: worker
+        image: danieloliv/php-k8s:latest
+        imagePullPolicy: Always
+        securityContext:
+          runAsUser: 33
+          allowPrivilegeEscalation: false
+          privileged: false
+        args:
+          - worker #command
+          - redis #driver
+          - "default" #queue
+          - "3" #tries
+          - "60" #timeout
+          - "10" #sleep
+        envFrom:
+          - configMapRef:
+              name: environment-config
+        ports:
+        - containerPort: 9000
+      terminationGracePeriodSeconds: 10
+      automountServiceAccountToken: false

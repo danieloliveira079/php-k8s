@@ -1,0 +1,6 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+ name: php-k8s
+ labels:
+   name: php-k8s
