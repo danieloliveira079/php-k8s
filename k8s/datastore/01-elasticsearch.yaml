@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-svc
+  namespace: datastore
+  labels:
+    name: elasticsearch-svc
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9200
+    targetPort: 9200
+  selector:
+    name: elasticsearch
+    app: elasticsearch
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: datastore
+  labels:
+    app: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: elasticsearch
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        name: elasticsearch
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: elasticsearch:2.3
+        env:
+          - name: ES_JAVA_OPTS
+            value: "-Xms512m -Xmx512m"
+        ports:
+        - containerPort: 9200
+        volumeMounts:
+          - name: data-storage
+            mountPath: /usr/share/elasticsearch/data
+      volumes:
+        - name: data-storage
+          hostPath:
+            path: /data/elasticsearch
+            type: DirectoryOrCreate

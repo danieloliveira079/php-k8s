@@ -37,6 +37,7 @@ RUN mkdir -p \
         storage/framework/sessions \
         storage/framework/views \
         storage/logs && \
+    mv envs/.env.production .env && \
     chown www-data:www-data /app && \
     chown -R www-data:www-data storage bootstrap/cache/
 

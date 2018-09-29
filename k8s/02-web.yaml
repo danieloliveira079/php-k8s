@@ -1,0 +1,103 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: php-k8s
+  labels:
+    name: web
+spec:
+  type: LoadBalancer
+  ports:
+  - name: web
+    port: 9001
+    targetPort: 9001
+    protocol: TCP
+  selector:
+    app: web
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: php-k8s
+  labels:
+    app: web
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      #imagePullSecrets:
+      #  - name: imagepullsecret
+      containers:
+        - name: nginx
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+          ports:
+          - containerPort: 9001
+          volumeMounts:
+            - name: php-fpm-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: php-fpm-config
+              mountPath: /etc/nginx/mime.types
+              subPath: mime.types
+            - name: shared-public-html
+              mountPath: /usr/share/nginx/html
+          readinessProbe:
+            tcpSocket:
+              port: 9001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 9001
+            initialDelaySeconds: 15
+            periodSeconds: 20
+        - name: web
+          image: danieloliv/php-k8s:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 33
+            allowPrivilegeEscalation: false
+            privileged: false
+          args:
+            - web #command
+          envFrom:
+            - configMapRef:
+                name: environment-config
+          ports:
+          - containerPort: 9000
+          volumeMounts:
+            - name: php-fpm-config
+              mountPath: /usr/local/etc/php-fpm.d/zz-docker.conf
+              subPath: www.conf
+            - name: shared-public-html
+              mountPath: /shared-public-html
+          readinessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+      terminationGracePeriodSeconds: 10
+      automountServiceAccountToken: false
+      volumes:
+        - name: php-fpm-config
+          configMap:
+            name: php-fpm-config
+        - name: shared-public-html
+          emptyDir: {}
