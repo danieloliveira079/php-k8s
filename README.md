@@ -22,7 +22,7 @@ In addition you can find a example of how to configure and run your local develo
   echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
   sudo apt-get update
   sudo apt-get install -y kubectl
-```
+  ```
 
 * Kubernetes Dashboard
   ```
