@@ -5,7 +5,7 @@ services:
     container_name: nginx
     image: nginx
     ports:
-      - "9001:80"
+      - "9002:80"
     depends_on:
       - web
     volumes:
