@@ -135,3 +135,7 @@ If you can't see the `Laravel` welcome page try the following:
   * Repeat the steps above but select the `php-k8s` instead.
 
 Depending on what is the problem you can workout the solution. Usually it can be related a services not ready under the `datastore` namespace. If it is the first time you are pushing your manifests and the images have never been pulled, it can take some time until the POD becomes available.
+
+## Security
+
+Check `security` folder for very useful info about how to make Kubernetes and Docker secure.
