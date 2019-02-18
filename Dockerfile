@@ -9,7 +9,8 @@ RUN apt-get update && \
     apt-get install -y apt-transport-https autoconf ca-certificates curl g++ gcc git \
         libfontconfig1 libjpeg62-turbo-dev libpng-dev libxml2-dev libxrender1 make \
         zip zlib1g-dev nodejs yarn && \
-    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --version=${COMPOSER_VERSION} && \
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin \
+      --filename=composer --version=${COMPOSER_VERSION} && \
     chmod +x /usr/local/bin/composer && \
     rm -rf /var/lib/apt/lists/*
 
@@ -26,7 +27,7 @@ ADD ./composer.json ./composer.lock /app/
 RUN composer global require hirak/prestissimo && \
 		/usr/local/bin/composer install --no-autoloader --no-scripts
 
-COPY . /app
+COPY --chown=www-data:www-data . /app
 
 RUN /usr/local/bin/composer install
 
@@ -37,11 +38,9 @@ RUN mkdir -p \
         storage/framework/sessions \
         storage/framework/views \
         storage/logs && \
-    mv envs/.env.production .env && \
-    chown www-data:www-data /app && \
-    chown -R www-data:www-data storage bootstrap/cache/
+    mv envs/.env.production .env
 
-#USER www-data
+USER www-data
 
 ENTRYPOINT ["bin/entrypoint.sh"]
 CMD ["web"]
