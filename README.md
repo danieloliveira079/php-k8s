@@ -26,7 +26,7 @@ In addition you can find a example of how to configure and run your local develo
 
 * Kubernetes Dashboard
   ```
-  kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+  kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml
   ```
 
 ## Local Development
@@ -111,11 +111,17 @@ Check your PODS:
 
 * Terminal: `kubectl -n php-k8s get pods`
 * Dashboard:
+  * Token - k get secrets default-token-vmfbz -o json | jq -r '.data.token' | base64 -D | pbcopy
   * `kubectl proxy` - http://localhost:8001
-  * Skip the Token/Kubeconfig screen
+  * Inform the token from previous step
   * Select `php-k8s` from the namespace list
 
-If there are no errors and all pods have the status equals RUNNING you can point your browser to http://localhost:9001.
+If there are no errors and all pods have the status equals RUNNING you can point your browser to http://localhost:9001 (if you using docker-for-mac).
+
+In case you are running minikube or remote cluster use the port-forward provided by `kubectl`.
+```
+kubectl -n php-k8s  port-forward svc/web 9001
+```
 
 You should be seeing the `Laravel` welcome page.
 
